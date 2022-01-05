@@ -67,6 +67,8 @@ public class PatchController : Controller
     {
         bool update = !string.Equals(version.TrimEnd(), LASTGAMEVERSION);
 
+        SetHeaders(update,"game",LASTGAMEVERSION);
+
         if (!update)
         {
             return null;

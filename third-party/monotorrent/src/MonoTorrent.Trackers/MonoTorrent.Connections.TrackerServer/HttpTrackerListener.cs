@@ -115,7 +115,7 @@ namespace MonoTorrent.Connections.TrackerServer
                 if (context.Request.Headers.Get ("X-Real-IP") != null) {
                     ip = IPAddress.Parse(context.Request.Headers.Get ("X-Real-IP"));
                 }
-                
+
                 BEncodedValue responseData = Handle (context.Request.RawUrl, ip, isScrape);
 
                 byte[] response = responseData.Encode ();

@@ -26,6 +26,7 @@ builder.ConfigureServices(services =>
             tracker.RegisterListener(services.GetRequiredService<ITrackerListener>());
             tracker.AllowScrape = true;
             tracker.AllowUnregisteredTorrents = false;
+            tracker.MinAnnounceInterval = TimeSpan.FromSeconds(30);
             
             return tracker;
         }

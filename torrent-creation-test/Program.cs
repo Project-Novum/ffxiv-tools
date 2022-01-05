@@ -89,7 +89,7 @@ foreach (var file in Directory.GetFiles("D:\\dev\\ffxiv-tools\\torrents\\PatchDa
     var tr = await Torrent.LoadAsync(file);
     
     var c = new TorrentCreator();
-    c.Announce = "http://127.0.0.1:54997/announce";
+    c.Announce = "http://t.ffxiv.helba.ai:80/announce";
     c.Name = "ffxiv";
     c.PieceLength = 16 * 16 * 1024;
     c.CreatedBy = null;

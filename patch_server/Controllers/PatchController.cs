@@ -10,12 +10,15 @@ namespace Patch_Server.Controllers;
 [Route("/patch/vercheck/ffxiv/win32/release")]
 public class PatchController : Controller
 {
-    private const string LASTBOOTVERSION = "2010.09.18.0000";
-    private const string LASTGAMEVERSION = "2012.09.19.0001";
-    private const string BOOTHASH = "2d2a390f";
-    private const string GAMEHASH = "48eca647";
+    private const string Lastbootversion = "2010.09.18.0000";
+    private const string Lastgameversion = "2012.09.19.0001";
+    private const string Boothash = "2d2a390f";
+    private const string Gamehash = "48eca647";
+    private const string Header = "477D80B1_38BC_41d4_8B48_5273ADB89CAC";
+    
     private readonly ILogger<PatchController> _logger;
     private readonly string _patchData;
+    
 
     public PatchController(ILogger<PatchController> logger, IConfiguration configuration)
     {
@@ -23,46 +26,46 @@ public class PatchController : Controller
         _patchData = configuration.GetValue("PatchData", "./");
     }
     
-    [HttpGet("{type}/{version}")]
-    public async Task GetTest(string type, string version)
+    [HttpGet("{type}/{currentVersion}")]
+    public async Task GetVersionCheck(string type, string currentVersion)
     {
         if (string.Equals(type, "boot",StringComparison.OrdinalIgnoreCase))
         {
-            await BootVersionCheck(version);
+            await BootVersionCheck(currentVersion.TrimEnd());
         }
         else
         {
-            await GameVersionCheck(version);
+            await GameVersionCheck(currentVersion.TrimEnd());
         }
     }
 
-    private async Task BootVersionCheck(string version)
+    private async Task BootVersionCheck(string currentVersion)
     {
-        bool update = !string.Equals(version.TrimEnd(), LASTBOOTVERSION);
+        bool update = !string.Equals(currentVersion, Lastbootversion);
 
         
         // Update Boot.exe 
-        SetHeaders(update,"boot",LASTBOOTVERSION);
+        SetHeaders(update,"boot",Lastbootversion);
         if (!update)
         {
             return;
         }
 
-        await SetBody("boot", version, UpdateMatrix.Bootversion); 
+        await SetBody("boot", currentVersion, UpdateMatrix.Bootversion,Lastbootversion); 
     }
 
-    private  async Task  GameVersionCheck(string version)
+    private  async Task  GameVersionCheck(string currentVersion)
     {
-        bool update = !string.Equals(version.TrimEnd(), LASTGAMEVERSION);
+        bool update = !string.Equals(currentVersion, Lastgameversion);
 
-        SetHeaders(update,"game",LASTGAMEVERSION);
+        SetHeaders(update,"game",Lastgameversion);
 
         if (!update)
         {
             return;
         }
         
-        await SetBody("game", version, UpdateMatrix.Gameversion);
+        await SetBody("game", currentVersion, UpdateMatrix.Gameversion,Lastgameversion);
     }
 
     private void SetHeaders(bool isUpdate, string type, string latestVersion)
@@ -102,35 +105,45 @@ public class PatchController : Controller
 
     }
 
-    private async Task<bool> SetBody(string type, string version, Dictionary<string, string> versions)
+    private async Task<bool> SetBody(string type, string currentVersion, Dictionary<string, string> versions,string latestVersion)
     {
-        var typeHash =  GetTypeHash(type);
-        var versionVals = versions.Values.ToArray();
-        var idx = Array.IndexOf(versionVals, version);
-        if (idx <= -1) return false;
-        
-        var vals = versionVals.Skip(idx + 1);
+        string typeHash =  GetTypeHash(type);
+        using StreamWriter writer = new (Response.Body, leaveOpen: true);
+        bool isUpToDate = false;
 
-        using var writer = new StreamWriter(Response.Body, leaveOpen: true);
-        var header = "477D80B1_38BC_41d4_8B48_5273ADB89CAC";
-        foreach (var update in vals)
+        do
         {
-            var path = Path.Join(_patchData, typeHash, "metainfo", $"D{update}.torrent");
-            using var reader = System.IO.File.OpenRead(path);
-            var f = await Torrent.LoadAsync(reader);
+            string versionToUpdateTo = versions[currentVersion];
+            
+            string path = Path.Join(_patchData, typeHash, "metainfo", $"D{versionToUpdateTo}.torrent");
+            using FileStream reader = System.IO.File.OpenRead(path);
+            
+            Torrent? f = await Torrent.LoadAsync(reader);
+            
             reader.Seek(0, SeekOrigin.Begin);
             
-            await writer.WriteAsync($"--{header}\r\n");
+            await writer.WriteAsync($"--{Header}\r\n");
             await writer.WriteAsync("Content-Type: application/octet-stream\r\n");
-            await writer.WriteAsync($"Content-Location: ffxiv/{type}/metainfo/D{update}.torrent\r\n");
+            await writer.WriteAsync($"Content-Location: ffxiv/{type}/metainfo/D{versionToUpdateTo}.torrent\r\n");
             await writer.WriteAsync($"X-Patch-Length: {f.Files.First().Length}\r\n");
             await writer.WriteAsync(
                 "X-Signature: jqxmt9WQH1aXptNju6CmCdztFdaKbyOAVjdGw_DJvRiBJhnQL6UlDUcqxg2DeiIKhVzkjUm3hFXOVUFjygxCoPUmCwnbCaryNqVk_oTk_aZE4HGWNOEcAdBwf0Gb2SzwAtk69zs_5dLAtZ0mPpMuxWJiaNSvWjEmQ925BFwd7Vk=\r\n");
             await writer.WriteAsync("\r\n");
             await writer.FlushAsync();
             await reader.CopyToAsync(writer.BaseStream);
-        }
-        await writer.WriteAsync($"\r\n--{header}--\r\n\r\n");
+
+            if (String.Equals(versionToUpdateTo, latestVersion))
+            {
+                isUpToDate = true;
+            }
+            else
+            {
+                currentVersion = versionToUpdateTo;
+            }
+
+        } while (!isUpToDate);
+        
+        await writer.WriteAsync($"\r\n--{Header}--\r\n\r\n");
 
         return true;
     }
@@ -139,11 +152,11 @@ public class PatchController : Controller
     {
         if (String.Equals(type, "boot",StringComparison.OrdinalIgnoreCase))
         {
-            return BOOTHASH;
+            return Boothash;
         }
         else
         {
-            return GAMEHASH;
+            return Gamehash;
         }
     }
 }

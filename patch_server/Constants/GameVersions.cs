@@ -5,10 +5,12 @@ public static class UpdateMatrix
 
 	public static readonly Dictionary<string, string> Bootversion = new Dictionary<string, string>()
 	{
-		{ "2010.07.10.0000", "2010.09.18.0000" }
+		{ "0", "2010.09.18.0000" },
+		{ "2010.07.10.0000", "2010.09.18.0000" },
 	};
 	public static readonly Dictionary<string, string> Gameversion = new Dictionary<string,string>() {
-        
+		
+		{"0" , "2010.07.10.0000"},
 		{"2010.07.10.0000" , "2010.09.19.0000"},
 		{"2010.09.19.0000" , "2010.09.23.0000"},
 		{"2010.09.23.0000" , "2010.09.28.0000"},

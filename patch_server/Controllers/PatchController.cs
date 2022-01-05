@@ -24,26 +24,19 @@ public class PatchController : Controller
     }
     
     [HttpGet("{type}/{version}")]
-    public async void  GetTest(string type, string version)
+    public async Task GetTest(string type, string version)
     {
-        byte[]? response;
-        if (String.Equals(type, "boot",StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(type, "boot",StringComparison.OrdinalIgnoreCase))
         {
-            response = BootVersionCheck(version);
+            await BootVersionCheck(version);
         }
         else
         {
-            response = GameVersionCheck(version);
+            await GameVersionCheck(version);
         }
-        
-
-        if (response!=null)
-            await Response.Body.WriteAsync(response);
-        else
-            NotFound();
     }
 
-    private byte[]? BootVersionCheck(string version)
+    private async Task BootVersionCheck(string version)
     {
         bool update = !string.Equals(version.TrimEnd(), LASTBOOTVERSION);
 
@@ -52,18 +45,13 @@ public class PatchController : Controller
         SetHeaders(update,"boot",LASTBOOTVERSION);
         if (!update)
         {
-            return null;
+            return;
         }
 
-        if (!UpdateMatrix.Bootversion.ContainsKey(version.TrimEnd()))
-        {
-            return null;
-        }
-        
-        return SetBody("boot", UpdateMatrix.Bootversion[version.TrimEnd()]); 
+        await SetBody("boot", version, UpdateMatrix.Bootversion); 
     }
 
-    private byte[]? GameVersionCheck(string version)
+    private  async Task  GameVersionCheck(string version)
     {
         bool update = !string.Equals(version.TrimEnd(), LASTGAMEVERSION);
 
@@ -71,26 +59,16 @@ public class PatchController : Controller
 
         if (!update)
         {
-            return null;
+            return;
         }
-
-        if (!UpdateMatrix.Gameversion.ContainsKey(version.TrimEnd()))
-        {
-            return null;
-        }
-
         
-        return SetBody("game", LASTGAMEVERSION); 
-            
+        await SetBody("game", version, UpdateMatrix.Gameversion);
     }
 
-    private void SetHeaders(bool isUpdate,string type,string latestVersion)
+    private void SetHeaders(bool isUpdate, string type, string latestVersion)
     {
-        string typeHash = GetTypeHash(type);
-        
-        
-        
-        IHeaderDictionary headerDictionary = new HeaderDictionary();
+        var typeHash = GetTypeHash(type);
+        var headerDictionary = new HeaderDictionary();
         
         headerDictionary.Add("Content-Location",$"ffxiv/{typeHash}/vercheck.dat");
         if (isUpdate)
@@ -108,8 +86,6 @@ public class PatchController : Controller
             headerDictionary.Add("Connection","keep-alive");
         }
 
-        
-
         foreach (var VARIABLE in headerDictionary)
         {
             Response.Headers.Add(VARIABLE);
@@ -126,38 +102,37 @@ public class PatchController : Controller
 
     }
 
-    private byte[] SetBody(string type, string versionToUpdate)
-    {        
-        string typeHash =  GetTypeHash(type) ;
-
-        var path = Path.Join(_patchData, typeHash, "metainfo", $"D{versionToUpdate}.torrent");
+    private async Task<bool> SetBody(string type, string version, Dictionary<string, string> versions)
+    {
+        var typeHash =  GetTypeHash(type);
+        var versionVals = versions.Values.ToArray();
+        var idx = Array.IndexOf(versionVals, version);
+        if (idx <= -1) return false;
         
-        byte[] torrentFile = System.IO.File.ReadAllBytes(path);
+        var vals = versionVals.Skip(idx + 1);
 
-        var f = Torrent.Load(torrentFile);
+        using var writer = new StreamWriter(Response.Body, leaveOpen: true);
+        var header = "477D80B1_38BC_41d4_8B48_5273ADB89CAC";
+        foreach (var update in vals)
+        {
+            var path = Path.Join(_patchData, typeHash, "metainfo", $"D{update}.torrent");
+            using var reader = System.IO.File.OpenRead(path);
+            var f = await Torrent.LoadAsync(reader);
+            reader.Seek(0, SeekOrigin.Begin);
+            
+            await writer.WriteAsync($"--{header}\r\n");
+            await writer.WriteAsync("Content-Type: application/octet-stream\r\n");
+            await writer.WriteAsync($"Content-Location: ffxiv/{type}/metainfo/D{update}.torrent\r\n");
+            await writer.WriteAsync($"X-Patch-Length: {f.Files.First().Length}\r\n");
+            await writer.WriteAsync(
+                "X-Signature: jqxmt9WQH1aXptNju6CmCdztFdaKbyOAVjdGw_DJvRiBJhnQL6UlDUcqxg2DeiIKhVzkjUm3hFXOVUFjygxCoPUmCwnbCaryNqVk_oTk_aZE4HGWNOEcAdBwf0Gb2SzwAtk69zs_5dLAtZ0mPpMuxWJiaNSvWjEmQ925BFwd7Vk=\r\n");
+            await writer.WriteAsync("\r\n");
+            await writer.FlushAsync();
+            await reader.CopyToAsync(writer.BaseStream);
+        }
+        await writer.WriteAsync($"\r\n--{header}--\r\n\r\n");
 
-        StringBuilder sb = new();
-        sb.Append("--477D80B1_38BC_41d4_8B48_5273ADB89CAC\r\n");
-        sb.Append("Content-Type: application/octet-stream\r\n");
-        sb.Append($"Content-Location: ffxiv/{typeHash}/metainfo/D{versionToUpdate}.torrent\r\n");
-        sb.Append($"X-Patch-Length: {f.Files.First().Length}\r\n");
-        sb.Append(
-            "X-Signature: jqxmt9WQH1aXptNju6CmCdztFdaKbyOAVjdGw_DJvRiBJhnQL6UlDUcqxg2DeiIKhVzkjUm3hFXOVUFjygxCoPUmCwnbCaryNqVk_oTk_aZE4HGWNOEcAdBwf0Gb2SzwAtk69zs_5dLAtZ0mPpMuxWJiaNSvWjEmQ925BFwd7Vk=\r\n");
-
-        sb.Append("\r\n");
-        
-        byte[] bodyHead = Encoding.Default.GetBytes(sb.ToString());
-        byte[] eof = Encoding.Default.GetBytes("\r\n--477D80B1_38BC_41d4_8B48_5273ADB89CAC--\r\n\r\n");
-        
-        
-        
-        byte[] final = new byte[bodyHead.Length + torrentFile.Length + eof.Length];
-        Buffer.BlockCopy(bodyHead,0,final,0,bodyHead.Length);
-        Buffer.BlockCopy(torrentFile,0,final,bodyHead.Length,torrentFile.Length);
-        Buffer.BlockCopy(eof,0,final,bodyHead.Length + torrentFile.Length,eof.Length);
-
-
-        return final;
+        return true;
     }
 
     private string GetTypeHash(string type)

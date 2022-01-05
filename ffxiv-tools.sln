@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "torrent-creation-test", "to
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{FB123050-4622-409D-B89E-204566F8493D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "patch_server", "patch_server\patch_server.csproj", "{DECD91A2-39FF-490E-B2BD-5709E7FBF7EA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,10 @@ Global
 		{28776B8E-1663-4316-9A67-9929089052EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28776B8E-1663-4316-9A67-9929089052EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28776B8E-1663-4316-9A67-9929089052EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DECD91A2-39FF-490E-B2BD-5709E7FBF7EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DECD91A2-39FF-490E-B2BD-5709E7FBF7EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DECD91A2-39FF-490E-B2BD-5709E7FBF7EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DECD91A2-39FF-490E-B2BD-5709E7FBF7EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -118,6 +124,7 @@ Global
 		{8A20E061-C462-4A41-873F-7FC2EB5ACD8C} = {D3850109-9C2B-438B-B0FF-09190B3195CE}
 		{5452A502-27EA-4541-BDC4-33B9B315EF7C} = {D3850109-9C2B-438B-B0FF-09190B3195CE}
 		{28776B8E-1663-4316-9A67-9929089052EB} = {FB123050-4622-409D-B89E-204566F8493D}
+		{DECD91A2-39FF-490E-B2BD-5709E7FBF7EA} = {D3850109-9C2B-438B-B0FF-09190B3195CE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ED243ABB-5A18-4414-B89A-B8937B4EBE86}

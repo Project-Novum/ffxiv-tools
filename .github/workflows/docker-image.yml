@@ -2,9 +2,9 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-push-image:
@@ -38,7 +38,7 @@ jobs:
           push: true
           tags: ghcr.io/toyz/ffxiv-tools/seeder:latest
           labels: ${{ steps.meta.outputs.labels }}
-          
+
       - name: tracker
         uses: docker/build-push-action@v2
         with:
@@ -46,4 +46,13 @@ jobs:
           file: tracker/Dockerfile
           push: true
           tags: ghcr.io/toyz/ffxiv-tools/tracker:latest
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: patch_server
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: patch_server/Dockerfile
+          push: true
+          tags: ghcr.io/toyz/ffxiv-tools/patch_server:latest
           labels: ${{ steps.meta.outputs.labels }}

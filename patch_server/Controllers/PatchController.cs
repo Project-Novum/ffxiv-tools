@@ -80,7 +80,7 @@ public class PatchController : Controller
         }
 
         
-        return SetBody("game", UpdateMatrix.Gameversion[version.TrimEnd()]); 
+        return SetBody("game", LASTGAMEVERSION); 
             
     }
 

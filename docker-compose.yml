@@ -1,0 +1,38 @@
+version: "3.2"
+services:
+  tracker:
+    image: ghcr.io/toyz/ffxiv-tools/tracker:latest
+    restart: always
+    ports:
+      - "8001:54997"
+    environment:
+      PatchData: /var/PatchData
+    volumes:
+      - type: bind
+        source: ./PatchData
+        target: /var/PatchData
+
+  seeder:
+    image: ghcr.io/toyz/ffxiv-tools/seeder:latest
+    restart: always
+    network_mode: host
+    scale: 4
+    environment:
+      PatchData: /var/PatchData
+      ServerPort: 0
+    volumes:
+      - type: bind
+        source: ./PatchData
+        target: /var/PatchData
+
+  patch_server:
+    image: ghcr.io/toyz/ffxiv-tools/patch_server:latest
+    restart: always
+    ports:
+      - "8002:80"
+    environment:
+      PatchData: /var/PatchData
+    volumes:
+      - type: bind
+        source: ./PatchData
+        target: /var/PatchData

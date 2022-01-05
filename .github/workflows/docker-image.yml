@@ -36,14 +36,14 @@ jobs:
           context: .
           file: seeder/Dockerfile
           push: true
-          tags: seeder
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/seeder:latest
           labels: ${{ steps.meta.outputs.labels }}
           
       - name: tracker
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: seeder/Dockerfile
+          file: tracker/Dockerfile
           push: true
-          tags: tracker
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/tracker:latest
           labels: ${{ steps.meta.outputs.labels }}

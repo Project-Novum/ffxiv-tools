@@ -111,7 +111,12 @@ namespace MonoTorrent.Connections.TrackerServer
                     return;
                 }
 
-                BEncodedValue responseData = Handle (context.Request.RawUrl, context.Request.RemoteEndPoint.Address, isScrape);
+                var ip = context.Request.RemoteEndPoint.Address;
+                if (context.Request.Headers.Get ("X-Real-IP") != null) {
+                    ip = IPAddress.Parse(context.Request.Headers.Get ("X-Real-IP"));
+                }
+                
+                BEncodedValue responseData = Handle (context.Request.RawUrl, ip, isScrape);
 
                 byte[] response = responseData.Encode ();
                 context.Response.ContentType = "text/plain";

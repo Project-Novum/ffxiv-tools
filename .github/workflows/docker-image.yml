@@ -36,7 +36,7 @@ jobs:
           context: .
           file: seeder/Dockerfile
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/seeder:latest
+          tags: ghcr.io/toyz/ffxiv-tools/seeder:latest
           labels: ${{ steps.meta.outputs.labels }}
           
       - name: tracker
@@ -45,5 +45,5 @@ jobs:
           context: .
           file: tracker/Dockerfile
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/tracker:latest
+          tags: ghcr.io/toyz/ffxiv-tools/tracker:latest
           labels: ${{ steps.meta.outputs.labels }}

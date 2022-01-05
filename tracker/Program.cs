@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using System.Text;
 using MonoTorrent;
 using MonoTorrent.BEncoding;
 using MonoTorrent.Connections.TrackerServer;
@@ -21,7 +22,7 @@ builder.ConfigureServices(services =>
         {
             var configuration = services.GetRequiredService<IConfiguration>();
 
-            var tracker = new TrackerServer(new BEncodedString("SQ0001-DcPDIHCph"));
+            var tracker = new TrackerServer(new BEncodedString(CreateTrackerId()));
             tracker.RegisterListener(services.GetRequiredService<ITrackerListener>());
             tracker.AllowScrape = true;
             tracker.AllowUnregisteredTorrents = false;
@@ -42,3 +43,17 @@ builder.ConfigureServices(services =>
 var app = builder.Build();
 
 await app.RunAsync();
+
+
+string CreateTrackerId()
+{
+    var peerIdRandomGenerator = new Random(DateTimeOffset.UnixEpoch.Millisecond);
+    
+    var sb = new StringBuilder (20);
+    sb.Append ("SQ0001-");
+    
+    while (sb.Length < 20)
+        sb.Append (peerIdRandomGenerator.Next (0, 9));
+
+    return sb.ToString();
+}

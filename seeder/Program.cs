@@ -2,6 +2,7 @@
 
 using System.Net;
 using MonoTorrent.Client;
+using MonoTorrent.TorrentWatcher;
 using seeder;
 
 var builder = Host.CreateDefaultBuilder(args);
@@ -26,6 +27,12 @@ builder.ConfigureServices(services =>
         return new ClientEngine(settingsBuilder.ToSettings());
     });
 
+    services.AddSingleton<ITorrentWatcher>((services) =>
+    {
+        var configuration = services.GetRequiredService<IConfiguration>();
+        return new TorrentFolderWatcher(configuration.GetValue("PatchData", "./"), "*.torrent");
+    });
+    
     services.AddHostedService<Server>();
 });
 

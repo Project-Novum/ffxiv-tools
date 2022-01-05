@@ -1,5 +1,6 @@
 ﻿using MonoTorrent;
 using MonoTorrent.Client;
+using MonoTorrent.TorrentWatcher;
 
 namespace seeder;
 
@@ -20,6 +21,8 @@ public class Server : BackgroundService
     /// </summary>
     private readonly IHostEnvironment _env;
 
+    private readonly ITorrentWatcher _torrentWatcher;
+
     /// <summary>
     /// The new line string
     /// </summary>
@@ -36,13 +39,16 @@ public class Server : BackgroundService
     /// <param name="logger">The logger</param>
     /// <param name="clientEngine">The client engine</param>
     /// <param name="env">The hosting environment</param>
-    public Server(ILogger<Server> logger, ClientEngine clientEngine, IHostEnvironment env, IConfiguration configuration)
+    public Server(ILogger<Server> logger, ClientEngine clientEngine, IHostEnvironment env, IConfiguration configuration, ITorrentWatcher torrentWatcher)
     {
         _logger = logger;
         _clientEngine = clientEngine;
         _env = env;
+        _torrentWatcher = torrentWatcher;
 
         _patchDataLocation = configuration.GetValue("PatchData", "./");
+        _torrentWatcher.TorrentFound += TorrentWatcherOnTorrentFound;
+        _torrentWatcher.TorrentLost += TorrentWatcherOnTorrentLost;
     }
 
     /// <summary>
@@ -53,19 +59,9 @@ public class Server : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _clientEngine.CriticalException += EngineCriticalException;
+        _torrentWatcher.Start();
+        _torrentWatcher.ForceScan();
         
-        foreach (var file in Directory.GetFiles(_patchDataLocation, "*.torrent", SearchOption.AllDirectories))
-        {
-            var torrent = await Torrent.LoadAsync(file);
-            var manager = await _clientEngine.AddAsync(torrent, _patchDataLocation);
-
-            manager.TorrentStateChanged += PatchStateChanged;
-            manager.PeerConnected += PeerConnected;
-            manager.PeerDisconnected += PeerDisconnected;
-
-            await manager.StartAsync();
-        }
-
         var initialized = false;
 
         while (_clientEngine.IsRunning)
@@ -101,6 +97,24 @@ public class Server : BackgroundService
 
             await stop;
         }
+    }
+    
+    private void TorrentWatcherOnTorrentLost(object? sender, TorrentWatcherEventArgs e)
+    {
+    }
+
+    private async void TorrentWatcherOnTorrentFound(object? sender, TorrentWatcherEventArgs e)
+    {
+        var t = await Torrent.LoadAsync(e.TorrentPath);
+        _logger.LogInformation($"Found: {t.InfoHash.ToHex()} -> {e.TorrentPath.Split(Path.DirectorySeparatorChar).Last()}");
+        
+        var manager = await _clientEngine.AddAsync(t, _patchDataLocation);
+
+        manager.TorrentStateChanged += PatchStateChanged;
+        manager.PeerConnected += PeerConnected;
+        manager.PeerDisconnected += PeerDisconnected;
+
+        await manager.StartAsync();
     }
 
     /// <summary>

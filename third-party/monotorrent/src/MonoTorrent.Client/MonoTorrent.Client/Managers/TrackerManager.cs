@@ -161,8 +161,6 @@ namespace MonoTorrent.Trackers
             await ClientEngine.MainLoop;
 
             var args = RequestFactory.CreateAnnounce (clientEvent);
-            args.WithIPAddress (await new WebClient ().DownloadStringTaskAsync ("ifconfig.me"));
-
             var announces = new List<Task> ();
             for (int i = 0; i < Tiers.Count; i++) {
                 var task = AnnounceTierAsync (Tiers[i], args, token);

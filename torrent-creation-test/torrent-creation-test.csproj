@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <RootNamespace>torrent_creation_test</RootNamespace>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\third-party\monotorrent\src\MonoTorrent.BEncoding\MonoTorrent.BEncoding.csproj" />
+      <ProjectReference Include="..\third-party\monotorrent\src\MonoTorrent.Client\MonoTorrent.Client.csproj" />
+      <ProjectReference Include="..\third-party\monotorrent\src\MonoTorrent\MonoTorrent.csproj" />
+    </ItemGroup>
+
+</Project>

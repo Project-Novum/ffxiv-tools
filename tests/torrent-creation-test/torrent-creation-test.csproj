@@ -9,9 +9,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\third-party\monotorrent\src\MonoTorrent.BEncoding\MonoTorrent.BEncoding.csproj" />
-      <ProjectReference Include="..\third-party\monotorrent\src\MonoTorrent.Client\MonoTorrent.Client.csproj" />
-      <ProjectReference Include="..\third-party\monotorrent\src\MonoTorrent\MonoTorrent.csproj" />
+      <ProjectReference Include="..\..\third-party\monotorrent\src\MonoTorrent.BEncoding\MonoTorrent.BEncoding.csproj" />
+      <ProjectReference Include="..\..\third-party\monotorrent\src\MonoTorrent.Client\MonoTorrent.Client.csproj" />
+      <ProjectReference Include="..\..\third-party\monotorrent\src\MonoTorrent\MonoTorrent.csproj" />
     </ItemGroup>
 
 </Project>

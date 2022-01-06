@@ -4,7 +4,18 @@ using System.Diagnostics;
 using System.Text;
 using MonoTorrent;
 using MonoTorrent.BEncoding;
-using tracker;
+using torrent_creation_test;
+
+var stockHash = "D8CC5488E9847936232AF91AC31B56306F03E88D";
+var encryptedHash = "B5EB8FD62545932C1118A3432CF36DF66F03E88D";
+var peerId = "-SQ0001-krMehjLVpOso";
+var bf = new Blowfish(Encoding.ASCII.GetBytes(peerId));
+var f = InfoHash.FromHex(stockHash).Span.ToArray();
+bf.Encipher(f, 0, 16);
+
+Console.WriteLine($"d: {BitConverter.ToString(f).Replace("-", "").ToUpper()}");
+Console.WriteLine($"s: {stockHash}");
+Console.WriteLine($"e: {encryptedHash}");
 
 /*
 var stockHash = "D8CC5488E9847936232AF91AC31B56306F03E88D";
@@ -80,6 +91,7 @@ await c.CreateAsync(new TorrentFileSource("D:\\dev\\ffxiv-tools\\torrents\\Patch
 }, "fuck.torrent");
 */
 
+/*
 foreach (var file in Directory.GetFiles("D:\\dev\\ffxiv-tools\\torrents\\PatchData\\ffxiv\\", "*.torrent",
              SearchOption.AllDirectories))
 {
@@ -107,4 +119,4 @@ class z : ITorrentFileSource
 {
     public IEnumerable<FileMapping> Files { get; set; }
     public string TorrentName { get; set; }
-}
+}*/

@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Threading;
 
 using MonoTorrent.BEncoding;
+using MonoTorrent.Client.MonoTorrent.Client.Managers;
 using MonoTorrent.Client.RateLimiters;
 using MonoTorrent.Connections;
 using MonoTorrent.Connections.Peer;
@@ -411,7 +412,10 @@ namespace MonoTorrent.Client
                 id.LastBlockReceived.Restart();
 
                 // Send our handshake now that we've decided to keep the connection
-                var handshake = new HandshakeMessage (manager.IncomingHash, id.PeerID, Constants.ProtocolStringV100);
+                var bf = new Blowfish (manager.Engine.PeerId.Span.ToArray ());
+                var hash = manager.Torrent.InfoHash.Span.ToArray ();
+                bf.Encipher(hash, 0, 16);
+                var handshake = new HandshakeMessage (InfoHash.FromMemory(hash), manager.Engine.PeerId, Constants.ProtocolStringV100);
                 await PeerIO.SendMessageAsync (id.Connection, id.Encryptor, handshake, manager.UploadLimiters, id.Monitor, manager.Monitor);
 
                 manager.HandlePeerConnected (id);

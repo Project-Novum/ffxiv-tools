@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Be.IO;
 
 namespace ZiPatch.Chunks;
 
@@ -9,7 +10,7 @@ public class Etry : Chunk
     public uint Count { get; }
     public EtryChunk[] Chunks { get; }
     
-    public Etry(EndiannessAwareBinaryReader reader) : base(reader)
+    public Etry(BeBinaryReader reader) : base(reader)
     {
         Path = Encoding.ASCII.GetString(reader.ReadBytes(reader.ReadInt32()));
         Count = reader.ReadUInt32();

@@ -1,15 +1,16 @@
 ﻿using System.Text;
+using Be.IO;
 using ZiPatch.Chunks;
 
 namespace ZiPatch;
 
 public class Reader : IDisposable
 {
-    private readonly EndiannessAwareBinaryReader _binaryReader;
+    private readonly BeBinaryReader _binaryReader;
     public Reader(string file)
     {
         _binaryReader =
-            new EndiannessAwareBinaryReader(new FileStream(file, FileMode.Open), EndiannessAwareBinaryReader.Endianness.Big);
+            new BeBinaryReader(new FileStream(file, FileMode.Open));
     }
 
     public Task<List<Chunk>> GetChunksAsync()
@@ -25,6 +26,10 @@ public class Reader : IDisposable
     public List<Chunk> GetChunks()
     {
         var chunks = new List<Chunk>();
+
+        var header = _binaryReader.ReadBytes(0x10);
+        if (!header.SequenceEqual(Constants.ZiPatchHeader))
+            throw new Exception("Invalid ZiPatch file detected");
         
         while (_binaryReader.BaseStream.Position < _binaryReader.BaseStream.Length)
         {
@@ -38,6 +43,10 @@ public class Reader : IDisposable
                     chunks.Add(new Aply(_binaryReader));
                     break;
                 case "ADIR":
+                    chunks.Add(new Adir(_binaryReader));
+                    break;
+                case "DLED":
+                    chunks.Add(new Dled(_binaryReader));
                     break;
                 case "ETRY":
                     chunks.Add(new Etry(_binaryReader));

@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Be.IO;
 
 namespace ZiPatch.Chunks;
 
@@ -11,7 +12,7 @@ public class Fhdr : Chunk
     public uint NumberAddDir { get; }
     public uint NumberDeleteDir { get; }
 
-    public Fhdr(EndiannessAwareBinaryReader reader) : base(reader)
+    public Fhdr(BeBinaryReader reader) : base(reader)
     {
         Version = reader.ReadUInt32();
         Result = Encoding.ASCII.GetString(reader.ReadBytes(4));

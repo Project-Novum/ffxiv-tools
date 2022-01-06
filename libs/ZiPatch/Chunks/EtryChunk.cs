@@ -1,14 +1,17 @@
-﻿using System.IO.Compression;
+﻿using System.Diagnostics;
+using System.IO.Compression;
+using Be.IO;
+using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 
 namespace ZiPatch.Chunks;
 
 public class EtryChunk : Chunk
 {
     public override ChunkType ChunkType => ChunkType.EtryData;
-    public uint HashMode { get; }
+    public int Mode { get; }
     public byte[] SourceFileHash { get; }
     public byte[] DestFileHash { get; }
-    public uint CompressMode { get; }
+    public int CompressMode { get; }
     public uint CompressedFileSize { get; }
     public uint PreviousFileSize { get; }
     public uint NewFileSize { get; }
@@ -18,12 +21,12 @@ public class EtryChunk : Chunk
     /// </summary>
     public long Position { get; }
     
-    public EtryChunk(EndiannessAwareBinaryReader reader) : base(reader)
+    public EtryChunk(BeBinaryReader reader) : base(reader)
     {
-        HashMode = reader.ReadUInt32();
+        Mode = BitConverter.ToInt32(reader.ReadBytes(4));
         SourceFileHash = reader.ReadBytes(0x14);
         DestFileHash = reader.ReadBytes(0x14);
-        CompressMode = reader.ReadUInt32();
+        CompressMode = BitConverter.ToInt32(reader.ReadBytes(4));
         CompressedFileSize = reader.ReadUInt32();
         PreviousFileSize = reader.ReadUInt32();
         NewFileSize = reader.ReadUInt32();
@@ -35,7 +38,6 @@ public class EtryChunk : Chunk
 
     public void Save(Stream output)
     {
-        var size = CompressedFileSize;
         Reader.BaseStream.Seek(0, SeekOrigin.Begin);
         Reader.BaseStream.Seek(Position, SeekOrigin.Begin);
         if (CompressMode == 0x4E)
@@ -44,8 +46,9 @@ public class EtryChunk : Chunk
         } else if (CompressMode == 0x5A)
         {
             var compressedFileStream = new MemoryStream(Reader.ReadBytes((int) CompressedFileSize));
-            using var compressor = new DeflateStream(compressedFileStream, CompressionMode.Decompress);
-            compressor.CopyTo(output);
+            using InflaterInputStream inflater = new InflaterInputStream(compressedFileStream);
+            inflater.CopyTo(output);
+            output.Position = 0;
         }
         else
         {

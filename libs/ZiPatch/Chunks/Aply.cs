@@ -1,4 +1,6 @@
-﻿namespace ZiPatch.Chunks;
+﻿using Be.IO;
+
+namespace ZiPatch.Chunks;
 
 public class Aply : Chunk
 {
@@ -7,7 +9,7 @@ public class Aply : Chunk
     public uint Unknown2 { get; }
     public uint Unknown3 { get; }
 
-    public Aply(EndiannessAwareBinaryReader reader) : base(reader)
+    public Aply(BeBinaryReader reader) : base(reader)
     {
         Unknown1 = reader.ReadUInt32();
         Unknown2 = reader.ReadUInt32();

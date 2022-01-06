@@ -7,7 +7,7 @@ using ZiPatch.Chunks;
 
 
 
-var _gamePath = "D:\\dev\\ffxiv-tools\\torrents\\extracted";
+var _gamePath = "D:\\games\\ffxiv\\SquareEnix\\FINAL FANTASY XIV";
 var sb = new StringBuilder();
 
 foreach (var file in Directory.GetFiles("D:\\dev\\ffxiv-tools\\torrents\\PatchData\\ffxiv", "*.patch", SearchOption.AllDirectories))
@@ -80,7 +80,7 @@ StringBuilder processEtry(string path, Etry entry, StringBuilder sb)
         if (!Directory.Exists(Path.GetDirectoryName(path)))
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
 
-        using var fs = new FileStream(path, FileMode.OpenOrCreate);
+        using var fs = TryGetFileStream(path);
         item.Save(fs);
         fs.Seek(0, SeekOrigin.Begin);
 
@@ -92,4 +92,26 @@ StringBuilder processEtry(string path, Etry entry, StringBuilder sb)
     }
 
     return sb;
+}
+
+FileStream TryGetFileStream(string path)
+{
+    var retryCount = 0;
+    while (true)
+    {
+        try
+        {
+            return new FileStream(path, FileMode.OpenOrCreate);
+        }
+        catch (IOException e)
+        {
+            if(retryCount == 5)
+            {
+                throw;
+            }
+
+            Thread.Sleep(TimeSpan.FromSeconds(1));
+            retryCount++;
+        }
+    }
 }

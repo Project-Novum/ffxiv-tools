@@ -124,7 +124,7 @@ public class PatchController : Controller
             
             await writer.WriteAsync($"--{Header}\r\n");
             await writer.WriteAsync("Content-Type: application/octet-stream\r\n");
-            await writer.WriteAsync($"Content-Location: ffxiv/{type}/metainfo/D{versionToUpdateTo}.torrent\r\n");
+            await writer.WriteAsync($"Content-Location: ffxiv/{typeHash}/metainfo/D{versionToUpdateTo}.torrent\r\n");
             await writer.WriteAsync($"X-Patch-Length: {f.Files.First().Length}\r\n");
             await writer.WriteAsync(
                 "X-Signature: jqxmt9WQH1aXptNju6CmCdztFdaKbyOAVjdGw_DJvRiBJhnQL6UlDUcqxg2DeiIKhVzkjUm3hFXOVUFjygxCoPUmCwnbCaryNqVk_oTk_aZE4HGWNOEcAdBwf0Gb2SzwAtk69zs_5dLAtZ0mPpMuxWJiaNSvWjEmQ925BFwd7Vk=\r\n");

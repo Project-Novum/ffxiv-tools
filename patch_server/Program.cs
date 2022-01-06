@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,9 @@ if (app.Environment.IsDevelopment())
 //app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseMetricServer();
+app.UseHttpMetrics();
 
 app.MapControllers();
 

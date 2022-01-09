@@ -1,0 +1,3 @@
+[submodule "third-party/monotorrent"]
+	path = third-party/monotorrent
+	url = git@github.com:Project-Novum/monotorrent.git

@@ -10,7 +10,7 @@ public class Reader : IDisposable
     public Reader(string file)
     {
         _binaryReader =
-            new BeBinaryReader(new FileStream(file, FileMode.Open));
+            new BeBinaryReader(new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read));
     }
 
     public Task<List<Chunk>> GetChunksAsync()

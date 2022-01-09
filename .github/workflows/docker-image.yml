@@ -38,7 +38,7 @@ jobs:
           context: .
           file: seeder/Dockerfile
           push: true
-          tags: ghcr.io/toyz/ffxiv-tools/seeder:latest
+          tags: ghcr.io/project-novum/ffxiv-tools/seeder:latest
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: tracker
@@ -47,7 +47,7 @@ jobs:
           context: .
           file: tracker/Dockerfile
           push: true
-          tags: ghcr.io/toyz/ffxiv-tools/tracker:latest
+          tags: ghcr.io/project-novum/ffxiv-tools/tracker:latest
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: patch_server
@@ -56,5 +56,5 @@ jobs:
           context: .
           file: patch_server/Dockerfile
           push: true
-          tags: ghcr.io/toyz/ffxiv-tools/patch_server:latest
+          tags: ghcr.io/project-novum/ffxiv-tools/patch_server:latest
           labels: ${{ steps.meta.outputs.labels }}
